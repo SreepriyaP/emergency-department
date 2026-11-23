@@ -1,21 +1,18 @@
-# ED Waiting Room: Volunteer Simulator
+# Emergency Department: waiting room prototypes
 
-A playable prototype. You are a patient in an emergency department waiting room and meet three kinds of volunteer: Service, Compassionate Care and First-Aid.
+Three prototypes about waiting in an emergency department.
 
-Play it at https://sreepriyap.github.io/waiting-room/ or scan `qr-the-wait.png`.
+Start at https://sreepriyap.github.io/emergency-department/ or scan `qr-emergency-department.png`.
 
-To run it on your own computer, open `index.html` in a browser. Everything is in that one file.
+| Page | What it is |
+|---|---|
+| `index.html` | Landing page: choose a prototype |
+| `volunteer.html` | **Volunteer mode.** You are a patient in an ED waiting room and meet three kinds of volunteer: Service, Compassionate Care and First-Aid. |
+| `sms-replay.html` | **Text updates.** Eight patients' text threads from a simulated Saturday: tests are re-estimated every 10 minutes and patients get an update text when their expected time moves. Best on a phone. |
+| `board-replay.html` | **Wait-time board.** The waiting-room screen replaying Sat 28 Nov 2026; every 5 minutes a LightGBM model picks each person's most likely 30-minute window. Best on a laptop or a phone turned sideways. |
+| `board-concept.html` | What-if board: press buttons for an ambulance arrival, a free room or an extra clinician. |
+| `sms-generator.html` | Text message builder with SMS length and safety checks. |
 
-All patients and scenarios are fictional.
+Every page is a single self-contained file: to run it on your own computer, open it in a browser (it also works offline).
 
-## ED Wait Times: proof of concept
-
-A waiting-room display board and patient text updates driven by prediction models, using synthetic data from a simulated hospital (Riverside General is fictional).
-
-See it at https://sreepriyap.github.io/waiting-room/wait-times/ or scan `qr-wait-times.png`.
-
-- `wait-times/board-replay.html`: the board replaying Sat 28 Nov 2026; every 5 minutes a LightGBM model picks each person's most likely 30-minute window.
-- `wait-times/sms-replay.html`: eight patients' text threads, with tests re-estimated every 10 minutes and update texts when a window moves.
-- `wait-times/board-concept.html` and `wait-times/sms-generator.html`: the earlier what-if demos.
-
-Every page is a single self-contained file and also works offline.
+All patients, hospitals and data are fictional. The wait-time models were trained on synthetic data from a simulated hospital (Riverside General).

@@ -1,41 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ED wait-time communication – proof of concept</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Emergency Department: waiting room prototypes</title>
+<meta name="description" content="Three prototypes about waiting in an emergency department: a volunteer simulator, patient text updates and a wait-time board.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
+:root{color-scheme:light dark;
+--bg:light-dark(#e4f1ec,#0d1b18);--ink:light-dark(#10302a,#e2f2ec);--mute:light-dark(#46655e,#9dbdb4);
+--card:light-dark(#ffffff,#16302a);--line:light-dark(#b4d3c9,#2a4b42);--board:#0a1d18;--led:#7df0c3;
+--svc:light-dark(#17806a,#3cc3a2);--cc:light-dark(#c2486c,#ec7f9f);--fa:light-dark(#cc3a29,#f2735f)}
 *{box-sizing:border-box}
-body{margin:0;background:#F4F6F8;color:#14212B;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
-.wrap{max-width:980px;margin:0 auto;padding:48px 24px;display:flex;flex-direction:column;gap:28px}
-h1{margin:0;font-size:32px}
-p{margin:0;line-height:1.5;color:#33475A}
-h2{margin:8px 0 0;font-size:18px;color:#46586A;text-transform:uppercase;letter-spacing:.05em}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-a.card{display:flex;flex-direction:column;gap:8px;padding:22px;background:#fff;border:1px solid #D5DEE5;border-radius:14px;color:inherit;text-decoration:none}
-a.card:hover{border-color:#0F766E;box-shadow:0 2px 10px rgba(15,118,110,.12)}
-a.card b{font-size:19px;color:#0B5A54}
-.note{font-size:14px;color:#46586A}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 20px 48px;display:flex;flex-direction:column;gap:28px}
+.top{display:flex;flex-direction:column;gap:10px}
+.kicker{display:inline-flex;align-items:center;gap:10px;font-family:Archivo,system-ui,sans-serif;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.led{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--led);box-shadow:0 0 0 3px color-mix(in srgb,var(--led) 30%,transparent)}
+h1{margin:0;font-family:Archivo,system-ui,sans-serif;font-weight:800;font-size:clamp(34px,7vw,56px);line-height:1.05;letter-spacing:-.01em}
+.lede{margin:0;max-width:60ch;color:var(--mute);font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.card{--accent:var(--svc);display:flex;flex-direction:column;gap:14px;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:18px;text-decoration:none;color:var(--ink);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.card:hover{border-color:var(--accent);box-shadow:0 6px 22px color-mix(in srgb,var(--accent) 18%,transparent)}
+.card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){.card:hover{transform:translateY(-2px)}}
+.icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.card h2{margin:0;font-family:Archivo,system-ui,sans-serif;font-weight:800;font-size:24px;line-height:1.15}
+.card p{margin:0;color:var(--mute)}
+.tag{align-self:flex-start;font-size:14px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+.go{margin-top:auto;display:inline-flex;align-items:center;gap:8px;font-family:Archivo,system-ui,sans-serif;font-weight:700;font-size:17px;color:var(--accent)}
+.c-vol{--accent:var(--svc)}.c-sms{--accent:var(--cc)}.c-board{--accent:var(--fa)}
+.more{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:baseline;padding-top:6px;border-top:1px solid var(--line);font-size:16px;color:var(--mute)}
+.more b{color:var(--ink)}
+.more a{color:var(--svc);font-weight:700}
+.note{margin:0;font-size:14px;color:var(--mute)}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div>
-    <h1>ED wait-time communication: proof of concept</h1>
-    <p style="margin-top:8px">A waiting-room display board and patient text updates for an emergency department. Everything here uses synthetic data from a simulated hospital (Riverside General is fictional). It runs entirely in your browser, with no internet needed.</p>
+<main class="wrap">
+  <header class="top">
+    <div class="kicker"><span class="led" aria-hidden="true"></span>Emergency Department</div>
+    <h1>What is it like to wait?</h1>
+    <p class="lede">Three prototypes about the emergency department waiting room. Meet the volunteers, follow a patient's text updates, or watch the wait-time board through a busy day.</p>
+  </header>
+
+  <nav class="grid" aria-label="Choose a prototype">
+    <a class="card c-vol" href="volunteer.html">
+      <span class="icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"></circle><path d="M3 20v-1a6 6 0 0 1 12 0v1"></path><circle cx="17.5" cy="8.5" r="2.5"></circle><path d="M16 14.2a5 5 0 0 1 5.5 4.8v1"></path></svg></span>
+      <h2>Volunteer mode</h2>
+      <p>Play as a patient in the waiting room and meet three kinds of volunteer: Service, Compassionate Care and First-Aid.</p>
+      <span class="go">Play <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="card c-sms" href="sms-replay.html">
+      <span class="icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"></rect><path d="M9 7h6"></path><path d="M9 10.5h4"></path><path d="M11 18h2"></path></svg></span>
+      <h2>Text updates</h2>
+      <p>Follow patients through their visit by the texts they receive: when tests are ordered, when results are back or running late, and when the doctor is coming.</p>
+      <span class="tag">Best on a phone</span>
+      <span class="go">See the texts <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="card c-board" href="board-replay.html">
+      <span class="icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M6 8.5h4"></path><path d="M13 8.5h5"></path><path d="M6 12.5h4"></path><path d="M13 12.5h5"></path></svg></span>
+      <h2>Wait-time board</h2>
+      <p>Replay a busy Saturday on the waiting-room screen. Every 5 minutes a prediction model updates when each person can expect to be seen.</p>
+      <span class="tag">Best on a laptop, or turn your phone sideways</span>
+      <span class="go">Watch the board <span aria-hidden="true">→</span></span>
+    </a>
+  </nav>
+
+  <div class="more">
+    <b>More to try:</b>
+    <a href="board-concept.html">What-if board</a>
+    <a href="sms-generator.html">Text message builder</a>
   </div>
-  <h2>Driven by the prediction models</h2>
-  <div class="grid">
-    <a class="card" href="board-replay.html"><b>Waiting room board: replay</b><p>Replay Sat 28 Nov minute by minute. Every 5 minutes a LightGBM model, trained on 22 months of history, picks each person's most likely 30-minute wait window. Turn on "Show what really happened" to compare with real waits.</p></a>
-    <a class="card" href="sms-replay.html"><b>Text updates: replay</b><p>Follow eight patients through their visit. Every test is re-estimated every 10 minutes; patients get an update text if their window moves. Each prediction is checked against what happened.</p></a>
-  </div>
-  <h2>Concept demos</h2>
-  <div class="grid">
-    <a class="card" href="board-concept.html"><b>Waiting room board: what-if demo</b><p>Press buttons for an ambulance arrival, a free room or an extra clinician and watch the estimates change (simple rule, not the trained model).</p></a>
-    <a class="card" href="sms-generator.html"><b>Text update generator</b><p>Pick a patient and an event to see the text that would be sent, with SMS length and safety checks.</p></a>
-  </div>
-  <p class="note"><b>On a phone?</b> The text update screens work best on a phone. The boards are designed for a waiting-room TV: turn your phone sideways, or open them on a laptop.</p>
-  <p class="note">Tips: the boards are sized for a 1920×1080 TV and scale to fit your window; press F11 for full screen. On the board replay, Space plays or pauses and the arrow keys step 5 minutes. Fonts load from Google Fonts when online; offline they fall back to your system font.</p>
-</div>
+  <p class="note">All patients, hospitals and data here are fictional. Wait times come from a simulated department, not a real one.</p>
+</main>
 </body>
 </html>
