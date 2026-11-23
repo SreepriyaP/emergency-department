@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waiting room board – concept demo (synthetic)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Atkinson+Hyperlegible+Mono:wght@500;700&display=swap">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#05090D;overflow:hidden}
+body{font-family:'Atkinson Hyperlegible Next',system-ui,-apple-system,'Segoe UI',sans-serif;color:#F2F5F7}
+.mono{font-family:'Atkinson Hyperlegible Mono',ui-monospace,Menlo,Consolas,monospace}
+#stage{position:absolute;left:0;top:0;width:1920px;transform-origin:0 0}
+.board{width:1920px;height:1080px;background:#0B1620;display:flex;flex-direction:column}
+.b-head{height:150px;padding:0 56px;display:flex;align-items:center;justify-content:space-between;background:#0F1F2B;border-bottom:2px solid #1F3445}
+.b-sub{font-size:26px;color:#9FB0BD;letter-spacing:.04em;text-transform:uppercase}
+.b-title{margin:0;font-size:56px;font-weight:700}
+.b-clock{font-size:64px;font-weight:700;text-align:right}
+.b-upd{font-size:24px;color:#9FB0BD;text-align:right}
+.b-main{flex:1;display:flex;gap:40px;padding:32px 56px 24px;min-height:0}
+.b-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.b-h2{margin:0;font-size:28px;font-weight:600}
+.b-key{font-size:21px;color:#9FB0BD}
+.b-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
+.b-table{background:#102030;border-radius:12px;overflow:hidden}
+.b-row{display:grid;grid-template-columns:140px minmax(0,1fr) 230px;gap:12px;align-items:center;height:72px;padding:0 20px;border-top:1px solid #1F3445}
+.b-th{display:grid;grid-template-columns:140px minmax(0,1fr) 230px;gap:12px;padding:14px 20px;background:#17293A;font-size:19px;color:#9FB0BD;text-transform:uppercase;letter-spacing:.05em}
+.b-num{font-size:36px;font-weight:700}
+.b-wait{font-size:32px;font-weight:600;white-space:nowrap}
+.b-stat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
+.pill{display:inline-block;padding:5px 12px;border-radius:999px;font-size:20px;font-weight:700;white-space:nowrap}
+.p-near{background:#1F4D3A;color:#9DF2C1}.p-del{background:#4A3510;color:#FFC266}.p-new{background:#1E3A52;color:#A9D8FF}
+.p-wait{font-size:22px;color:#B8C7D2}
+.real{font-size:17px;white-space:nowrap}.r-ok{color:#9DF2C1}.r-miss{color:#FFC266}.r-left{color:#B8C7D2}
+.b-msg{font-size:30px;color:#9FB0BD;padding:40px 0}
+.b-over{font-size:24px;color:#FFC266}
+.b-aside{width:420px;flex-shrink:0;display:flex;flex-direction:column;gap:16px;min-height:0;overflow:hidden}
+.ev{border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;border:2px solid}
+.ev-info{background:#13222E;border-color:#23415A}.ev-warn{background:#3A2A0E;border-color:#8A6420}.ev-good{background:#133826;border-color:#2E7A52}
+.ev-lbl{font-size:18px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.ev-info .ev-lbl{color:#9FB0BD}.ev-warn .ev-lbl{color:#FFC266}.ev-good .ev-lbl{color:#9DF2C1}
+.ev-txt{font-size:23px;line-height:1.3}.ev-warn .ev-txt{color:#FFF1D6}.ev-good .ev-txt{color:#E3FBEC}
+.card{background:#13222E;border-radius:12px;padding:18px 20px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+.s-n{font-size:40px;line-height:1.1;font-weight:700}.s-l{font-size:19px;color:#9FB0BD}
+.why h3{margin:0 0 8px;font-size:25px;font-weight:700;color:#4FD1C5}
+.why p,.sms p{margin:0;font-size:21px;line-height:1.35;color:#DCE5EB}
+.sms{display:flex;gap:14px;align-items:flex-start}
+.b-foot{height:72px;padding:0 56px;display:flex;align-items:center;gap:16px;background:#4FD1C5;color:#062A27;font-size:27px;font-weight:700}
+.demo{background:#E9EEF2;color:#14212B;padding:20px 56px;display:flex;flex-direction:column;gap:14px}
+.d-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.d-t1{font-size:20px;font-weight:700}.d-t2{font-size:16px;color:#46586A}
+.btn{height:48px;padding:0 16px;border-radius:10px;border:2px solid #0F766E;background:#fff;color:#0B5A54;font:inherit;font-size:18px;font-weight:700;cursor:pointer}
+.btn-p{background:#0F766E;color:#fff;border-color:#0F766E;min-width:120px}
+.btn-warn{border-color:#9A5B00;color:#7A4700}.btn-q{border-color:#8696A4;color:#33475A;background:transparent}
+.chk{display:flex;align-items:center;gap:10px;font-size:18px;min-height:44px;cursor:pointer;margin-left:12px}
+.chk input{width:22px;height:22px;accent-color:#0F766E}
+.range{flex:1;height:28px;accent-color:#0F766E}
+.d-note{font-size:17px;color:#33475A;line-height:1.4}
+.hint{position:fixed;right:12px;bottom:10px;font:13px system-ui,sans-serif;color:#7F8E9B}
+@media (hover:none){.hint{display:none}}
+
+</style>
+</head>
+<body>
+<div id="frame" style="position:fixed;inset:0;overflow:hidden">
+<div id="stage" style="height:1200px">
+<div class="board">
+  <div class="b-head">
+    <div><div class="b-sub">Riverside General Hospital · Emergency Department</div><h1 class="b-title">Estimated waiting times</h1></div>
+    <div><div class="b-clock mono" id="clock">--:--</div><div class="b-upd">Updated <span id="clock2">--:--</span> · refreshes every 5 minutes</div></div>
+  </div>
+  <div class="b-main">
+    <section class="b-left">
+      <div><h2 class="b-h2">Find your number from your triage slip</h2><div class="b-key">A Main ED · F Fast Track · P Children's</div></div>
+      <div class="b-cols" id="cols"></div>
+      <div class="b-over" id="over" hidden></div>
+    </section>
+    <aside class="b-aside">
+      <div class="ev ev-info" id="ev"><div class="ev-lbl">Latest change</div><div class="ev-txt" id="evtxt"></div></div>
+      <div class="card stats">
+        <div><div class="s-n" id="s-wait">–</div><div class="s-l">People waiting</div></div>
+        <div><div class="s-n" id="s-rooms">–</div><div class="s-l">Spaces free</div></div>
+        <div><div class="s-n" id="s-clin">–</div><div class="s-l">Clinicians on shift</div></div>
+        <div><div class="s-n" id="s-long">–</div><div class="s-l">Latest expected</div></div>
+      </div>
+      <div class="card why"><h3>Why your wait can change</h3><p>People are seen by urgency, not arrival time. Ambulance arrivals can push waits up; free rooms and extra staff bring them down.</p></div>
+      <div class="card sms"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4FD1C5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M10 18h4"></path></svg><p>In a treatment room? Ask reception about text updates on your tests and wait.</p></div>
+    </aside>
+  </div>
+  <div class="b-foot"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#062A27" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5"></path><path d="M12 16.5v.5"></path></svg>Feeling worse while you wait? Tell the triage nurse straight away. Don't leave without telling a staff member.</div>
+</div>
+<div class="demo" style="height:120px;flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap">
+  <div style="margin-right:16px"><div class="d-t1">Demo controls</div><div class="d-t2">Not shown on the real display · synthetic data</div></div>
+  <button class="btn btn-p" data-act="tick">Advance 10 minutes</button>
+  <button class="btn btn-warn" data-act="amb">Ambulance arrival (urgent)</button>
+  <button class="btn" data-act="room">Treatment space frees up</button>
+  <button class="btn" data-act="staff">Clinician joins shift</button>
+  <button class="btn btn-q" data-act="reset">Reset</button>
+</div>
+</div>
+</div>
+<script>
+const SVC = { A: 55, F: 25, P: 35 }, AREAS = ['A', 'F', 'P'];
+const SEED = [['A-207','A',3,128],['A-209','A',3,104],['A-211','A',3,22],['A-212','A',3,71],['A-214','A',4,55],['A-216','A',3,18],
+  ['F-096','F',4,140],['F-098','F',5,121],['F-101','F',4,88],['F-102','F',4,64],['F-104','F',5,40],['F-106','F',4,12],['P-029','P',3,47],['P-031','P',4,20]];
+const $ = (id) => document.getElementById(id);
+function fresh() {
+  return { clock: 14 * 60 + 20, pts: SEED.map((a) => ({ id: a[0], area: a[1], tri: a[2], arr: a[3] })), rooms: 1, clin: 9, backlog: 0,
+    served: { A: 0, F: 0, P: 0 }, seq: { A: 217, F: 107, P: 32 }, prev: null, walkin: 0,
+    event: 'Estimates are calculated from current staffing, free treatment spaces and the number of people waiting.', kind: 'info' };
+}
+let S = fresh();
+const pad = (n) => (n < 10 ? '0' : '') + n;
+const r5 = (m) => Math.max(5, Math.round(m / 5) * 5);
+const hm = (m) => (m < 60 ? m + ' min' : (m % 60 === 0 ? Math.floor(m / 60) + ' h' : Math.floor(m / 60) + ' h ' + pad(m % 60)));
+function clk(m) { m = Math.round(m) % 1440; if (m < 0) m += 1440; const h = Math.floor(m / 60), mm = m % 60; return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm; }
+function toMin(s) { const p = String(s).split(':'); return +p[0] * 60 + +p[1]; }
+function range(est, now) {
+  if (est < 30) return 'Before ' + clk(now + 30);
+  const lo = Math.floor(est / 30) * 30;
+  if (lo >= 240) return 'After ' + clk(now + 240);
+  return clk(now + lo) + '–' + clk(now + lo + 30);
+}
+const servers = (s) => ({ A: Math.max(1, s.clin - 4), F: 2, P: 1 });
+const queue = (s, a) => s.pts.filter((p) => p.area === a).sort((x, y) => (x.tri - y.tri) || (y.arr - x.arr));
+function est(s) {
+  const m = {}, sv = servers(s);
+  AREAS.forEach((a) => {
+    let pen = 0;
+    if (a === 'A') pen = (s.rooms === 0 ? 25 : (s.rooms === 1 ? 10 : 0)) + s.backlog;
+    if (a === 'P' && s.rooms === 0) pen = 10;
+    queue(s, a).forEach((p, i) => { m[p.id] = Math.max(0, Math.round((i + 0.6) * SVC[a] / sv[a] + pen)); });
+  });
+  return m;
+}
+function act(kind) {
+  if (kind === 'reset') { S = fresh(); render(); return; }
+  const before = est(S), n = JSON.parse(JSON.stringify(S));
+  let elapsed = 0, msg = '', k = 'info';
+  if (kind === 'tick') {
+    elapsed = 10; n.clock += 10; n.pts.forEach((p) => { p.arr += 10; });
+    const sv = servers(n); let called = 0;
+    AREAS.forEach((a) => {
+      n.served[a] += 10 * sv[a] / SVC[a];
+      while (n.served[a] >= 1) {
+        const q = queue(n, a); if (!q.length) { n.served[a] = 0; break; }
+        const gone = q[0].id; n.pts = n.pts.filter((p) => p.id !== gone); n.served[a] -= 1; called++;
+      }
+    });
+    n.backlog = Math.max(0, n.backlog - 10);
+    const area = n.walkin % 3 === 2 ? 'A' : 'F'; n.walkin++; n.seq[area]++;
+    const nid = area + '-' + String(n.seq[area]).padStart(3, '0');
+    n.pts.push({ id: nid, area, tri: 4, arr: 0 });
+    msg = '10 minutes passed. ' + called + (called === 1 ? ' person was' : ' people were') + ' called in, and ' + nid + ' joined the queue.';
+  } else if (kind === 'amb') {
+    n.backlog += 35; n.rooms = Math.max(0, n.rooms - 1); msg = 'A patient needing urgent care arrived by ambulance. Main ED waits have gone up.'; k = 'warn';
+  } else if (kind === 'room') {
+    if (n.rooms >= 4) msg = 'All spare treatment spaces are already open in this demo.';
+    else { n.rooms++; msg = 'A treatment space became free. Main ED waits have come down.'; k = 'good'; }
+  } else if (kind === 'staff') {
+    if (n.clin >= 14) msg = 'The demo is capped at 14 clinicians.';
+    else { n.clin++; msg = 'An extra clinician started their shift. Main ED waits have come down.'; k = 'good'; }
+  }
+  n.prev = {}; Object.keys(before).forEach((id) => { n.prev[id] = before[id] - elapsed; });
+  n.event = msg; n.kind = k; S = n; render();
+}
+function render() {
+  const e = est(S), ids = S.pts.map((p) => p.id).sort();
+  const rows = ids.map((id) => {
+    const v = e[id], pv = S.prev ? S.prev[id] : undefined;
+    const isNew = !!S.prev && pv === undefined, near = !isNew && v <= 10, del = !isNew && !near && pv !== undefined && v - pv >= 10;
+    const st = isNew ? '<span class="pill p-new">Just added</span>' : near ? '<span class="pill p-near">Please stay nearby</span>' :
+      del ? '<span class="pill p-del">Wait increased</span>' : '<span class="p-wait">Waiting</span>';
+    return '<div class="b-row"><div class="b-num mono">' + id + '</div><div class="b-wait">' + range(v, S.clock) + '</div><div class="b-stat">' + st + '</div></div>';
+  });
+  const head = '<div class="b-th"><div>Number</div><div>Expected time</div><div>Status</div></div>';
+  $('cols').innerHTML = [rows.slice(0, 9), rows.slice(9, 18)].map((c) => '<div class="b-table">' + head + c.join('') + '</div>').join('');
+  $('over').hidden = rows.length <= 18; $('over').textContent = '+' + (rows.length - 18) + ' more numbers. Please ask at reception.';
+  const c = pad(Math.floor(S.clock / 60) % 24) + ':' + pad(S.clock % 60);
+  $('clock').textContent = c; $('clock2').textContent = c;
+  $('ev').className = 'ev ev-' + S.kind; $('evtxt').textContent = S.event;
+  let mx = 0; Object.values(e).forEach((v) => { if (v > mx) mx = v; });
+  $('s-wait').textContent = S.pts.length; $('s-rooms').textContent = S.rooms + ' / 38'; $('s-clin').textContent = S.clin; $('s-long').textContent = clk(S.clock + r5(mx * 1.2));
+}
+document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => act(b.dataset.act)));
+function fit() {
+  const fr = document.getElementById('frame'), W = fr.clientWidth, Hh = fr.clientHeight;
+  const s = Math.min(W / 1920, Hh / 1200);
+  const st = $('stage');
+  st.style.transform = 'scale(' + s + ')';
+  st.style.left = Math.max(0, (W - 1920 * s) / 2) + 'px';
+  st.style.top = Math.max(0, (Hh - 1200 * s) / 2) + 'px';
+}
+addEventListener('resize', fit); fit(); render();
+</script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patient text update generator – concept (synthetic)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Atkinson+Hyperlegible+Mono:wght@500;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F4F6F8;color:#14212B;font-family:'Atkinson Hyperlegible Next',system-ui,-apple-system,'Segoe UI',sans-serif}
+.mono{font-family:'Atkinson Hyperlegible Mono',ui-monospace,Menlo,Consolas,monospace}
+.wrap{max-width:1360px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:24px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
+.kicker{font-size:15px;color:#46586A;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+h1{margin:4px 0;font-size:34px}
+.lede{margin:0;font-size:17px;color:#46586A}
+.chip{font-size:15px;color:#46586A;background:#fff;border:1px solid #D5DEE5;border-radius:999px;padding:8px 16px}
+.cols{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.left{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.right{flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:16px;align-items:center}
+.card{background:#fff;border:1px solid #D5DEE5;border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.card.hl{border:2px solid #0F766E}
+h2{margin:0;font-size:19px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.pick{text-align:left;display:flex;flex-direction:column;gap:3px;padding:12px 14px;min-height:64px;border-radius:10px;border:1px solid #C3CED7;background:#fff;color:#14212B;font:inherit;cursor:pointer}
+.pick[aria-pressed=true]{border:2px solid #0F766E;background:#E6F4F2}
+.pick b{font-size:16px}.pick span{font-size:14px;color:#46586A}
+.pills{display:flex;flex-wrap:wrap;gap:10px}
+.pl{height:44px;padding:0 18px;border-radius:999px;border:1px solid #C3CED7;background:#fff;color:#14212B;font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.pl[aria-pressed=true]{background:#0F766E;border-color:#0F766E;color:#fff}
+.pl.amber[aria-pressed=true]{background:#8A5300;border-color:#8A5300}
+.delaybox{display:flex;flex-direction:column;gap:10px;padding:16px;background:#FFF6E8;border:1px solid #F0D3A2;border-radius:10px}
+.delaybox .lbl{font-size:15px;font-weight:700;color:#6B4200}
+.opts{display:flex;flex-wrap:wrap;gap:24px}
+.opts label{display:flex;align-items:center;gap:10px;font-size:16px;min-height:44px;cursor:pointer}
+.opts input{width:20px;height:20px;accent-color:#0F766E}
+.msg{margin:0;font-size:17px;line-height:1.5;padding:16px 18px;background:#F4F6F8;border-radius:10px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:#33475A}
+.checks{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:15px}
+.checks li{display:flex;gap:10px;align-items:flex-start}
+.btn{height:46px;padding:0 20px;border-radius:10px;border:1px solid #8696A4;background:#fff;color:#33475A;font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.btn.p{background:#0F766E;border-color:#0F766E;color:#fff;font-weight:700}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.range{flex:1;height:28px;accent-color:#0F766E;min-width:160px}
+.small{font-size:14px;color:#46586A}
+.clockbig{font-size:28px;font-weight:700}
+.tbl{width:100%;border-collapse:collapse;font-size:15px;min-width:700px}
+.tbl th{text-align:left;padding:8px 6px;color:#46586A;font-size:13px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #D5DEE5;font-weight:600}
+.tbl td{padding:10px 6px;border-bottom:1px solid #EEF2F5;vertical-align:middle}
+.tbl tr.future td{color:#5A6B7A}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:700;font-size:14px}
+.t-ok{background:#DDF3E6;color:#14532D}.t-late{background:#FFF1D6;color:#7A4700}.t-early{background:#E3EEF9;color:#163E66}
+.scroll{overflow-x:auto}
+.phone{width:360px;max-width:100%;height:740px;border-radius:44px;background:#14212B;padding:14px}
+.screen{height:100%;border-radius:32px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+.ph-top{padding:22px 16px 14px;border-bottom:1px solid #E1E7EC;display:flex;flex-direction:column;align-items:center;gap:6px}
+.avatar{width:44px;height:44px;border-radius:50%;background:#0F766E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.thread{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px;background:#FAFBFC}
+.bub{max-width:88%;background:#E9EEF2;border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:14px;line-height:1.4}
+.bub.warn{background:#FFF1D6;color:#3D2600}
+.ts{font-size:11px;color:#5A6B7A;padding-left:6px}
+.ph-in{padding:10px 14px 16px;border-top:1px solid #E1E7EC}
+.ph-in div{height:36px;border-radius:18px;border:1px solid #D5DEE5;display:flex;align-items:center;padding:0 14px;font-size:13px;color:#5A6B7A}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:6px 0;border-top:1px solid #EEF2F5}
+.kv span:first-child{color:#46586A}.kv span:last-child{font-weight:700;text-align:right}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><div class="kicker">Riverside General · Emergency Department</div><h1>Patient text update generator</h1><p class="lede">Proof of concept · synthetic patients · nothing is actually sent</p></div>
+    <div class="chip">Opted-in patients in rooms: 4</div>
+  </div>
+  <div class="cols">
+    <div class="left">
+      <div class="card"><h2>1 · Patient</h2><div class="grid2" id="patients"></div></div>
+      <div class="card"><h2>2 · What changed</h2><div class="pills" id="types"></div>
+        <div class="delaybox" id="delaybox" hidden>
+          <div class="lbl">Delay reason (from operations feed)</div><div class="pills" id="reasons"></div>
+          <div class="lbl">Added delay</div><div class="pills" id="delays"></div>
+        </div>
+      </div>
+      <div class="card"><h2>3 · Message options</h2>
+        <div class="opts">
+          <label><input type="checkbox" id="o-name" checked> Use first name</label>
+          <label><input type="checkbox" id="o-test" checked> Name the test or scan</label>
+          <label><input type="checkbox" id="o-det" checked> Include queue detail</label>
+        </div>
+      </div>
+      <div class="card hl">
+        <div class="row" style="justify-content:space-between"><h2>4 · Generated message</h2><div class="small">To <span id="phone"></span></div></div>
+        <p class="msg mono" id="msg"></p>
+        <div class="meta"><span id="chars"></span><span id="segs"></span></div>
+        <ul class="checks" id="checks"></ul>
+        <div class="row"><button class="btn p" id="send">Send to phone preview</button><button class="btn" id="clear">Clear thread</button></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="phone"><div class="screen">
+        <div class="ph-top"><div class="avatar">ED</div><div style="font-size:15px;font-weight:700">Riverside ED</div><div class="small" style="font-size:12px">Text message · 55123</div></div>
+        <div class="thread" id="thread"></div>
+        <div class="ph-in"><div>Text message</div></div>
+      </div></div>
+      <div class="card" style="width:100%;max-width:420px;gap:8px"><h2 style="font-size:16px">Data behind this estimate</h2><p class="small" style="margin:0">Synthetic operations feed for <span id="pid"></span></p><div id="inputs"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const PTS = [
+  { key: 'a201', id: 'A-201', room: 'Room 7', first: 'Jordan', guardian: false, phone: '+1 555-0142', test: 'CT scan', generic: 'scan', modality: 'CT', ahead: 3, perTest: 18, readMin: 35, docMin: 25, clinFree: '2 of 9', beds: '1 of 38' },
+  { key: 'a198', id: 'A-198', room: 'Room 12', first: 'Priya', guardian: false, phone: '+1 555-0177', test: 'chest X-ray', generic: 'X-ray', modality: 'X-ray', ahead: 1, perTest: 10, readMin: 20, docMin: 30, clinFree: '2 of 9', beds: '1 of 38' },
+  { key: 'p028', id: 'P-028', room: 'Room 3', first: 'Sam', guardian: true, phone: '+1 555-0109', test: 'ultrasound', generic: 'scan', modality: 'Ultrasound', ahead: 2, perTest: 25, readMin: 30, docMin: 20, clinFree: '1 of 3', beds: '0 of 6' },
+  { key: 'f099', id: 'F-099', room: 'Fast Track 2', first: 'Alex', guardian: false, phone: '+1 555-0163', test: 'wrist X-ray', generic: 'X-ray', modality: 'X-ray', ahead: 0, perTest: 10, readMin: 20, docMin: 15, clinFree: '1 of 2', beds: '3 of 10' }
+];
+const TYPES = [['welcome', 'Sign-up confirmation'], ['scan', 'Test booked'], ['wait', 'Waiting for results'], ['delay', 'Delay'], ['results', 'Results ready']];
+const REASONS = [['urgent', 'Urgent arrivals', 'several patients needing urgent care have arrived'], ['scanner', 'Imaging queue', 'the imaging queue is longer than expected'], ['busy', 'Team busy', 'the team is busier than expected right now']];
+const DELAYS = [15, 30, 45];
+const S = { pk: 'a201', type: 'scan', reason: 'urgent', delay: 30, useName: true, nameTest: true, detailed: true, clock: 14 * 60 + 35, threads: {} };
+PTS.forEach((p) => { S.threads[p.key] = []; });
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = (n) => (n < 10 ? '0' : '') + n;
+const r5 = (m) => Math.max(5, Math.round(m / 5) * 5);
+const hm = (m) => (m < 60 ? m + ' min' : (m % 60 === 0 ? Math.floor(m / 60) + ' hr' : Math.floor(m / 60) + ' hr ' + (m % 60) + ' min'));
+function range(m) {
+  if (m <= 15) return 'within 15 min';
+  const lo = Math.floor(m / 30) * 30, hi = lo + 30;
+  if (hi <= 60) return 'about ' + lo + '-' + hi + ' min';
+  return 'about ' + hm(lo) + ' to ' + hm(hi);
+}
+function build(p) {
+  const H = 'Riverside ED:';
+  const who = p.guardian ? (S.useName ? p.first + "'s" : "your child's") : 'your';
+  const hi = S.useName && !p.guardian ? 'Hi ' + p.first + ',' : 'Hi,';
+  const test = S.nameTest ? p.test : p.generic, you = p.guardian ? 'you both' : 'you';
+  const start = p.ahead * p.perTest, results = start + p.perTest + p.readMin, stop = ' Reply STOP to opt out.';
+  const aheadTxt = p.ahead === 0 ? 'No one is ahead in the queue. ' : (p.ahead === 1 ? '1 patient is ahead in the queue. ' : p.ahead + ' patients are ahead in the queue. ');
+  const reason = REASONS.find((r) => r[0] === S.reason)[2];
+  if (S.type === 'welcome') return H + ' ' + hi + ' you are signed up for text updates while ' + (p.guardian ? (S.useName ? p.first + ' is' : 'your child is') : 'you are') + ' in ' + p.room + '. We will text when the plan or wait time changes.' + stop;
+  if (S.type === 'scan') return H + ' ' + hi + ' ' + who + ' ' + test + ' is booked. ' + (S.detailed ? aheadTxt : '') + 'Expected start: ' + range(start) + '. A porter will collect ' + you + ' from ' + p.room + '.' + stop;
+  if (S.type === 'wait') return H + ' ' + hi + ' the team is waiting on ' + who + ' ' + test + ' results. A doctor should review them in ' + range(results) + (S.detailed ? ' (includes the time to read the images)' : '') + '. Feeling worse? Press the call button.' + stop;
+  if (S.type === 'delay') return H + ' Sorry, ' + who + ' ' + test + ' is running about ' + S.delay + ' min late because ' + reason + '. New expected start: ' + range(start + S.delay) + '. We will text again if this changes.' + stop;
+  return H + ' ' + hi + ' ' + who + ' results are back. A doctor will come to ' + p.room + ' to talk them through, expected ' + range(p.docMin) + '. Please stay in the department.' + stop;
+}
+const OK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Pass" style="flex-shrink:0"><path d="M5 12l5 5 9-10"></path></svg>';
+const WARN = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A5B00" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Check" style="flex-shrink:0"><path d="M12 7v6"></path><path d="M12 17v.5"></path><circle cx="12" cy="12" r="10"></circle></svg>';
+function pills(el, items, cur, cls, onPick) {
+  el.innerHTML = items.map((it) => '<button class="pl ' + cls + '" data-v="' + it[0] + '" aria-pressed="' + (String(it[0]) === String(cur)) + '">' + esc(it[1]) + '</button>').join('');
+  el.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.v)));
+}
+function render() {
+  const p = PTS.find((x) => x.key === S.pk);
+  $('patients').innerHTML = PTS.map((x) => '<button class="pick" data-k="' + x.key + '" aria-pressed="' + (x.key === S.pk) + '"><b class="mono">' + x.id + ' · ' + esc(x.room) +
+    '</b><span>' + esc(x.first + (x.guardian ? ' (child) · ' : ' · ') + x.test) + '</span></button>').join('');
+  $('patients').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { S.pk = b.dataset.k; render(); }));
+  pills($('types'), TYPES, S.type, '', (v) => { S.type = v; render(); });
+  $('delaybox').hidden = S.type !== 'delay';
+  pills($('reasons'), REASONS, S.reason, 'amber', (v) => { S.reason = v; render(); });
+  pills($('delays'), DELAYS.map((d) => [d, '+' + d + ' min']), S.delay, 'amber', (v) => { S.delay = +v; render(); });
+  const msg = build(p), len = msg.length, gsm = /^[\x20-\x7E\n]*$/.test(msg);
+  const segs = gsm ? (len <= 160 ? 1 : Math.ceil(len / 153)) : (len <= 70 ? 1 : Math.ceil(len / 67));
+  $('msg').textContent = msg; $('chars').textContent = len + ' characters';
+  $('segs').textContent = segs + (segs === 1 ? ' segment' : ' segments') + (gsm ? ' · GSM-7' : ' · Unicode');
+  $('phone').textContent = p.phone + (p.guardian ? ' (parent/guardian)' : '');
+  const checks = [[true, 'Approved template: no diagnosis or result values'],
+    [gsm, gsm ? 'Plain characters only (GSM-7), so no Unicode splitting' : 'Contains special characters: message will split into short segments'],
+    [segs <= 2, segs <= 2 ? 'Fits in ' + segs + ' SMS segment' + (segs > 1 ? 's' : '') : segs + ' segments: consider brief mode'],
+    [msg.indexOf('STOP') >= 0, 'Includes STOP opt-out']];
+  if (S.nameTest) checks.push([false, 'Names the test: check this matches local privacy policy for SMS']);
+  if (p.guardian) checks.push([true, 'Child patient: addressed to parent or guardian']);
+  $('checks').innerHTML = checks.map((c) => '<li>' + (c[0] ? OK : WARN) + '<span>' + esc(c[1]) + '</span></li>').join('');
+  const th = S.threads[S.pk];
+  $('thread').innerHTML = th.length ? th.map((m) => '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><div class="ts">' + m.time + '</div><div class="bub">' + esc(m.text) + '</div></div>').join('')
+    : '<div class="small" style="text-align:center;padding:20px 8px;font-size:13px">Generate an update and press "Send to phone preview".</div>';
+  $('thread').scrollTop = $('thread').scrollHeight;
+  $('pid').textContent = p.id;
+  const start = p.ahead * p.perTest;
+  const inputs = [[p.modality + ' patients ahead', String(p.ahead)], ['Average ' + p.modality + ' slot today', p.perTest + ' min'], ['Image reporting time (last 4 h)', p.readMin + ' min'],
+    ['Clinicians free in area', p.clinFree], ['Treatment spaces free', p.beds], ['Model estimate to start', start + ' min (-15% / +20%)']];
+  $('inputs').innerHTML = inputs.map((r) => '<div class="kv"><span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>').join('');
+  $('o-name').checked = S.useName; $('o-test').checked = S.nameTest; $('o-det').checked = S.detailed;
+}
+$('o-name').addEventListener('change', (e) => { S.useName = e.target.checked; render(); });
+$('o-test').addEventListener('change', (e) => { S.nameTest = e.target.checked; render(); });
+$('o-det').addEventListener('change', (e) => { S.detailed = e.target.checked; render(); });
+$('send').addEventListener('click', () => {
+  const p = PTS.find((x) => x.key === S.pk);
+  S.threads[S.pk].push({ time: 'Today ' + pad(Math.floor(S.clock / 60)) + ':' + pad(S.clock % 60), text: build(p) });
+  S.clock += 7; render();
+});
+$('clear').addEventListener('click', () => { S.threads[S.pk] = []; render(); });
+render();
+</script>
+</body>
+</html>
