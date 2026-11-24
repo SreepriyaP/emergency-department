@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ED Waiting Room: Volunteer Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: warm, humane, plain-spoken; a patient's-eye view of a long night.
    IDEA: a hospital waiting room played like a cosy visual novel, with a live wait-time board.
@@ -41,15 +41,28 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--role);outline-o
 .card button{margin-top:auto;background:var(--role);color:#fff;border:0;font-weight:700;padding:10px 18px;align-self:flex-start}
 .room{background:var(--wall);border-radius:20px;overflow:hidden;aspect-ratio:800/340;box-shadow:0 10px 30px -18px #0007}
 .room svg{width:100%;height:100%;display:block}
-.bd{background:var(--board);color:var(--led);border-radius:18px;padding:16px;box-shadow:inset 0 0 0 6px #1b3a32}
-.bd h3{color:#fff;font-size:17px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.bd h3 span{color:#8fb3a8;font:400 13px "Atkinson Hyperlegible",sans-serif}
-.bd ol{list-style:none;margin:10px 0;padding:0}
-.bd li{display:flex;justify-content:space-between;padding:5px 10px;border-bottom:1px dashed #1f4038;font-variant-numeric:tabular-nums;white-space:nowrap}
-.bd li.me{background:var(--led);color:var(--board);border-radius:8px;font-weight:700}
-.bd li.flash{animation:fl 1.2s}
+.bd{background:#0B1620;color:#F2F5F7;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px -18px #0007}
+.bd-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:#0F1F2B;border-bottom:2px solid #1F3445}
+.bd-sub{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9FB0BD}
+.bd h3{margin:2px 0 0;color:#F2F5F7;font:800 17px/1.15 Archivo,sans-serif}
+.bd-clock{font:700 24px "Atkinson Hyperlegible Mono",ui-monospace,monospace;color:#F2F5F7;text-align:right}
+.bd-upd{display:block;font:400 11px "Atkinson Hyperlegible",sans-serif;color:#9FB0BD}
+.bd-body{padding:12px 12px 12px}
+.bd-key{margin:0 0 8px;font-size:12px;color:#9FB0BD}
+.bd-tbl{background:#102030;border-radius:10px;overflow:hidden}
+.bd-th,.bd-row{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px}
+.bd-th{background:#17293A;font-size:11px;color:#9FB0BD;text-transform:uppercase;letter-spacing:.05em;padding:7px 10px}
+.bd-row{border-top:1px solid #1F3445;font-variant-numeric:tabular-nums}
+.bd-num{font:700 16px "Atkinson Hyperlegible Mono",ui-monospace,monospace}
+.bd-num small{display:block;font:700 10px "Atkinson Hyperlegible",sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.bd-win{font-weight:700;font-size:15px;white-space:nowrap}
+.bd-pill{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.p-near{background:#1F4D3A;color:#9DF2C1}.p-del{background:#4A3510;color:#FFC266}.p-wait{font-size:12.5px;color:#B8C7D2}
+.bd-row.me{background:#4FD1C5;color:#062A27}.bd-row.me .p-wait{color:#062A27}
+.bd-row.flash{animation:fl 1.2s}
 @keyframes fl{0%{background:#fff}}
-.bd p{margin:0;color:#8fb3a8;font-size:13px}
+.bd-why{margin:10px 2px 0;font-size:12.5px;line-height:1.4;color:#DCE5EB}
+.bd-foot{display:flex;gap:8px;align-items:center;background:#4FD1C5;color:#062A27;font-weight:700;font-size:13px;line-height:1.3;padding:9px 14px}
 .play{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;margin-top:20px;align-items:start}
 .dlg{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,28px);min-height:300px}
 .spk{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -152,10 +165,17 @@ svg .arm,svg .lg{transform-box:fill-box;transform-origin:50% 6%;transition:trans
     <div class="play">
       <div class="dlg" id="dlg" aria-live="polite"></div>
       <aside class="side">
-        <div class="bd">
-          <h3>Estimated wait <span>Updated every 5 min</span></h3>
-          <ol id="board"></ol>
-          <p>Estimates use current staffing, beds and patient volumes. Order depends on urgency, not arrival time.</p>
+        <div class="bd" role="region" aria-label="Waiting room board">
+          <div class="bd-head">
+            <div><div class="bd-sub">Emergency Department</div><h3>Estimated waiting times</h3></div>
+            <div class="bd-clock"><span id="bdClock"></span><span class="bd-upd">Updated every 5 min</span></div>
+          </div>
+          <div class="bd-body">
+            <p class="bd-key">Find your number from your triage slip</p>
+            <div class="bd-tbl"><div class="bd-th"><span>Number</span><span>Expected time</span><span>Status</span></div><div id="board"></div></div>
+            <p class="bd-why">People are seen by urgency, not arrival time. Ambulance arrivals can push waits up; free rooms and extra staff bring them down.</p>
+          </div>
+          <div class="bd-foot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5"></path><path d="M12 16.5v.5"></path></svg>Feeling worse? Tell the triage nurse straight away.</div>
         </div>
         <div class="box"><span class="small">You are</span><h3 id="youN"></h3><p id="youD" class="small"></p><div id="meters"></div></div>
       </aside>
@@ -254,7 +274,7 @@ svc:{title:"Hour three",role:'svc',vol:'Sam',time:'9:40',
  blanket:{who:'v',via:'far',pos:'near',later:{set:{blanket:1,cold:0},emo:{you:'♥'}},fx:[-5,25,0],did:"Brought a warmed blanket",text:"We keep blankets in a warmer behind triage. Here, it’s still toasty. Anything else?",ch:HUB},
  phone:{who:'v',pos:'near',act:'nod',set:{charge:1},fx:[-10,10,5],did:"Lent a charging cable so Alex didn’t have to leave their seat",text:"There’s a charging station by the entrance, but you’d have to leave your seat. I’ve got a loaner cable on my cart that reaches the outlet behind you. Let’s use that so the nurse can still find you. Anything else?",ch:HUB},
  time:{who:'v',pos:'near',act:'point',fx:[-10,0,25],did:"Explained the wait-time board and text updates",note:"Volunteers help patients read the AI wait-time board. They never promise when someone will be seen.",
-  text:s=>`See B-27 on the board? That’s you. The estimate updates every few minutes based on staffing, beds and how many people are ahead of you. Right now it says about ${fmt(s.wait)}. I can’t speed it up, but if it changes you’ll see it there, and once you’re in a room you can opt in to text updates. Anything else?`,ch:HUB},
+  text:s=>`See B-27 on the board? That’s you. The estimate updates every few minutes based on staffing, beds and how many people are ahead of you. Right now it says you should be seen ${seenBy(s.wait)}. I can’t speed it up, but if it changes you’ll see it there, and once you’re in a room you can opt in to text updates. Anything else?`,ch:HUB},
  dx:{who:'v',pos:'near',emo:{vol:'?'},fx:[0,0,10],note:"Volunteers never guess at diagnoses. Medical questions go to the clinical team.",
   text:"That one’s for the doctor. I’d only be guessing, and a guess could steer you wrong. What I can do is tell your nurse you’re worried and ask her to check in. Want me to?",
   ch:[{t:"Yes, please.",go:'dx2',fx:[-10,0,5]},{t:"No, it’s fine.",go:'hub'}]},
@@ -346,7 +366,7 @@ fa:{title:"Something’s wrong",role:'fa',vol:'Jordan',time:'11:50',
   text:"Jordan checks whether he responds and whether he’s breathing, then calls to the triage desk: “Code Blue, waiting room!” A nurse comes running. Jordan starts chest compressions, counting out loud, until the resuscitation team arrives and takes over. They wheel the man straight back.",ch:[{t:"Catch your breath",go:'after'}]},
  after:{who:'v',pos:'near',npos:'off',set:{collapse:0,gone:1},text:"He’s with the team now. That was a lot to watch. How are you doing?",ch:[{t:"Shaky. Is he going to be okay?",go:'ok'},{t:"I’m fine. Is my wait longer now?",go:'longer'}]},
  ok:{who:'v',pos:'near',emo:{vol:'♥'},fx:[-10,5,0],note:"Volunteers keep other patients’ information private.",text:"I honestly don’t know, and I couldn’t share his details even if I did. But he got help fast, partly because people around him spoke up. Let’s keep that hand up for now.",ch:[{t:"Okay",go:'end'}]},
- longer:{who:'v',pos:'near',act:'point',fx:[-5,0,15],text:s=>`Probably a bit. When an emergency comes in, the team gets pulled away and the board catches up. See? B-31 is now about ${fmt(s.wait)}. It’ll keep updating, and nobody’s forgotten you.`,ch:[{t:"Okay",go:'end'}]},
+ longer:{who:'v',pos:'near',act:'point',fx:[-5,0,15],text:s=>`Probably a bit. When an emergency comes in, the team gets pulled away and the board catches up. See? B-31 now says ${seenBy(s.wait)}. It’ll keep updating, and nobody’s forgotten you.`,ch:[{t:"Okay",go:'end'}]},
  end:{end:true,pos:'near',emo:{you:'♥'},text:"Your hand is still raised and the bleeding has stopped. You’ve also seen what a trained volunteer can do in the minute before the clinical team arrives."}
 }}};
 
@@ -419,8 +439,16 @@ const apply=fx=>{if(!fx)return;st.anx=cl(st.anx+fx[0]);st.com=cl(st.com+fx[1]);s
 const T=t=>typeof t==='function'?t(st):t;
 const tog=(s,v)=>{const e=$(s);if(e)e.style.display=v?'':'none'};
 
-function board(){const rows=[...cur.board,[cur.you.id,st.wait,1]].sort((a,b)=>a[1]-b[1]);
- $('#board').innerHTML=rows.map(r=>`<li class="${r[2]?'me'+(lastWait!==st.wait?' flash':''):''}"><span>${r[0]}${r[2]?' (you)':''}</span><span>${fmt(r[1])}</span></li>`).join('');lastWait=st.wait}
+const clk=m=>{m=((Math.round(m)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+const nowMin=()=>{const [h,m]=cur.time.split(':').map(Number);return (h%12+12)*60+m};
+function win(w){const n=nowMin();if(w<30)return'Before '+clk(n+30);const lo=Math.floor(w/30)*30;if(lo>=240)return'After '+clk(n+240);return clk(n+lo)+'–'+clk(n+lo+30)}
+function seenBy(w){const n=nowMin();if(w<30)return'before '+clk(n+30);const lo=Math.floor(w/30)*30;if(lo>=240)return'after '+clk(n+240);return'between '+clk(n+lo)+' and '+clk(n+lo+30)}
+function board(){const rows=[...cur.board,[cur.you.id,st.wait,1]].sort((a,b)=>a[0].localeCompare(b[0]));
+ $('#bdClock').textContent=clk(nowMin());
+ $('#board').innerHTML=rows.map(r=>{const me=r[2],up=me&&lastWait!==undefined&&st.wait>lastWait,
+  pill=r[1]<=20?'<span class="bd-pill p-near">Please stay nearby</span>':up?'<span class="bd-pill p-del">Wait increased</span>':'<span class="p-wait">Waiting</span>';
+  return `<div class="bd-row${me?' me'+(lastWait!==st.wait?' flash':''):''}"><span class="bd-num">${r[0]}${me?'<small>You</small>':''}</span><span class="bd-win">${win(r[1])}</span>${pill}</div>`}).join('');
+ lastWait=st.wait}
 function meters(){const M=[['Anxiety',st.anx,'#d98a3a','lower is better'],['Comfort',st.com,`var(${ROLES[cur.role].v})`,''],['Feeling informed',st.inf,'#4d7fc4','']];
  $('#meters').innerHTML=M.map(m=>`<div class="m"><div><span>${m[0]}${m[3]?` <span class="small">(${m[3]})</span>`:''}</span><span>${m[1]}</span></div><div class="bar"><i style="width:${m[1]}%;background:${m[2]}"></i></div></div>`).join('')}
 function scene(){const f=st.f,Y=YOU[KEY];
